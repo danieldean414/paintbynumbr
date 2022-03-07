@@ -1,0 +1,27 @@
+Package: paintbynumbr
+Title: Quantitatively Generate Color Schemes on Two Axes
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Daniel",
+    family = "Dean",
+    email = "daniel.dean414@gmail.com",
+    role = c("aut", "cre"),
+          )
+Description: This package Hex-value generates color schemes for plots from numeric or factor inputs; it is essentially a wrapper for the 'colorspace' package. 
+    Next sentence so I can see if this formatitng (4 spaces) is correct.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    colorspace,
+    dplyr,
+    ggplot2,
+    magrittr,
+    tidyr
+Suggests: 
+    rmarkdown,
+    knitr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
