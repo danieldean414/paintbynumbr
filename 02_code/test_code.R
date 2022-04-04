@@ -12,8 +12,8 @@ library(tidyr)
 
 #' Remap
 #'
-#' @param input
-#' @param input_start
+#' @param input numeric vector to be "rescaled" to a new trget range
+#' @param input_start Lowest value for input vector; minimum by default, but can be set by default e.g. for unfiformity
 #' @param input_end
 #' @param output_start
 #' @param output_end

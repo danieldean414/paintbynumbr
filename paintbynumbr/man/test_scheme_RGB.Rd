@@ -21,3 +21,8 @@ color codes ("color_id") to be plugged in to ggplot2 or other downstream functio
 \description{
 Title
 }
+\examples{
+ex_color_1  <- rnorm(n = 100)
+ex_color_2 <- rnorm(n = 100, mean = 5)
+ test_scheme_RGB(ex_color_1, ex_color_2)
+}

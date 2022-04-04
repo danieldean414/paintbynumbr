@@ -16,6 +16,77 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(paintbynumbr)
+library(dplyr)
+library(ggplot2) # not required for main functions
+library(magrittr)
+library(tidyr)
+library(ggplot2)
+library(colorspace)
+library(paintbynumbr)
+
+## Examples using hierarchical color schemes
+
+data("fars_accidents")
+
+  # Factors
+    # oh, breaks with ordinal factors... maybe convert to characters and then onward?
+      # but would want to preserve order
+
+
+fars_color_continuous <- fars_accidents %>% filter(!(LONGITUDNAME %in% c("Not Reported",
+                                                                     "Not Available",
+                                                                     "Reported as Unknown")) & 
+                                                     !(LATITUDENAME %in% c("Not Reported",
+                                                                       "Not Available",
+                                                                       "Reported as Unknown"))) %>%
+  filter(LONGITUD > -100, LATITUDE > 25 & LATITUDE < 50) %>%
+  mutate(color_id = test_scheme_RGB(color_1 = LONGITUD, color_2 = LATITUDE))
+
+# Plotting with source values:
+fars_color_continuous %>%
+  ggplot() + 
+  aes(
+    x = LONGITUD,
+    y = LATITUDE,
+    color = color_id
+  ) +
+  geom_point() +
+  scale_color_identity() + # key step
+  theme_minimal()
+
+# Plotting with new continuous values:
+fars_color_continuous %>%
+  filter(HOUR <= 24 & MINUTE <= 60) %>%
+  ggplot() + 
+  aes(
+    x = HOUR,
+    y = MINUTE,
+    fill = color_id
+  ) +
+  geom_tile() +
+  scale_fill_identity() + # key step
+  theme_minimal()
+
+# Adding a key for full color scale:
+  # Kind of `hacky` for now with specifying onyl the default RGB scheme; 
+    # was unsuccessfully trying to let it take a function as an argument
+    # Also trying to figure out how to make literal inputs carry over 
+        #(e.g. in this case keep "LATITUDE" as the col. name)
+
+paintbynumbr_key(fars_color_continuous$LONGITUD, fars_color_continuous$LATITUDE) %>%
+  ggplot() +
+  aes(
+    x = x,
+    y = y,
+    fill = color
+  ) +
+  geom_tile() +
+  scale_fill_identity() +
+  theme_minimal() +
+  labs(
+    x = "Latitude",
+    y = "Longitude"
+  )
 
 
 ```
