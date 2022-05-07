@@ -23,27 +23,42 @@ library(tidyr)
 library(ggplot2)
 library(colorspace)
 library(paintbynumbr)
-
-## Examples using hierarchical color schemes
-
-data("fars_accidents")
-
-  # Factors
-    # oh, breaks with ordinal factors... maybe convert to characters and then onward?
-      # but would want to preserve order
+library(stringr)
 
 
-fars_color_continuous <- fars_accidents %>% filter(!(LONGITUDNAME %in% c("Not Reported",
-                                                                     "Not Available",
-                                                                     "Reported as Unknown")) & 
-                                                     !(LATITUDENAME %in% c("Not Reported",
-                                                                       "Not Available",
-                                                                       "Reported as Unknown"))) %>%
-  filter(LONGITUD > -100, LATITUDE > 25 & LATITUDE < 50) %>%
-  mutate(color_id = test_scheme_RGB(color_1 = LONGITUD, color_2 = LATITUDE))
 
-# Plotting with source values:
-fars_color_continuous %>%
+
+# Filtering down to Texas to speed up plotting times a bit...
+data("fars_accidents") # note: still including unknowns/unreported
+
+fars_tx <- fars_accidents %>%
+  #filter(LONGITUD > -200, LATITUDE > 25 & LATITUDE < 50) %>% # continental US
+  filter(STATENAME == "Texas") %>%
+  filter(LONGITUD < 0 & LATITUDE < 100) %>% # removing `unknown` records
+  mutate(color_id = paint_by_2d_scale_hsv(paint_by_1 = LONGITUD, paint_by_2 = LATITUDE))
+
+# Continuous "Legend" Gradient showing all possible values <- might be worth allowing manually setting max/min (
+  # e.g. to allow 0-10 when lowest observed value happens to be 1)
+
+# Note: different dimensions than input, so can't pipe directly
+fars_tx_key <- paint_by_2d_scale_hsv_legend(paint_by_1 = fars_tx$LONGITUD,
+                                                     paint_by_2 = fars_tx$LATITUDE,
+                                                     resolution = 30) %>%
+  ggplot() +
+  aes(x = labels_x,
+      y = labels_y,
+      fill = color_id) +
+  geom_tile() +
+  scale_fill_identity() +
+  labs(x = "Longitude",
+       y = "Latitude",
+       title = "Texas FARS Data: Color Gradient by Coordinates")
+
+fars_tx_key
+
+# Plotting simple 'map' with point coordinates:
+  # could use e.g. `st_as_sf()` for GIS plotting
+fars_tx %>%
   ggplot() + 
   aes(
     x = LONGITUD,
@@ -54,39 +69,75 @@ fars_color_continuous %>%
   scale_color_identity() + # key step
   theme_minimal()
 
-# Plotting with new continuous values:
-fars_color_continuous %>%
-  filter(HOUR <= 24 & MINUTE <= 60) %>%
+# filtering to cases with reported weather
+
+fars_tx_weather <- fars_tx %>%
+    dplyr::filter(dplyr::across(.cols = c(WEATHERNAME, LGT_CONDNAME),
+                                .fns = ~!str_detect(., "((?i)not reported)|(?i)unknown|(?i)not available")))
+
+# Plotting against weather and light conditions:
+fars_tx_weather %>%
   ggplot() + 
   aes(
-    x = HOUR,
-    y = MINUTE,
-    fill = color_id
+    y = WEATHERNAME,
+    x = LGT_CONDNAME,
+    color = color_id
+  ) +
+  geom_jitter() +
+  scale_color_identity() + # key step
+  theme_minimal()
+
+# Categorical coloring by Weather and Lighting Conditions
+  # color_family_gen also accepts numeric values for one or both parameters 
+  # Demonstrating manual setting of stop/start angles; realistically probably 
+    # have to manually order 'meaningful' values to get intuitive colors
+
+fars_tx_weather %>%
+    mutate(weather_color_id = color_family_gen(level_1 = WEATHERNAME, level_2 = LGT_CONDNAME,
+                                               start_angle = 120, stop_angle = 360)) %>%
+  ggplot() + 
+  aes(
+    x = WEATHERNAME,
+    y = LGT_CONDNAME,
+    fill = weather_color_id
   ) +
   geom_tile() +
   scale_fill_identity() + # key step
   theme_minimal()
 
-# Adding a key for full color scale:
-  # Kind of `hacky` for now with specifying onyl the default RGB scheme; 
-    # was unsuccessfully trying to let it take a function as an argument
-    # Also trying to figure out how to make literal inputs carry over 
-        #(e.g. in this case keep "LATITUDE" as the col. name)
+# Legend for complete cases:
 
-paintbynumbr_key(fars_color_continuous$LONGITUD, fars_color_continuous$LATITUDE) %>%
+  
+fars_tx_key_weather <- color_family_gen_legend(level_1 = fars_tx_weather$WEATHERNAME,
+                                               level_2 = fars_tx_weather$LGT_CONDNAME,
+                                               resolution = 30, start_angle = 90, stop_angle = 360) %>%
   ggplot() +
-  aes(
-    x = x,
-    y = y,
-    fill = color
-  ) +
+  aes(x = labels_x,
+      y = labels_y,
+      fill = color_id) + # note this is a default name assigned in-function
   geom_tile() +
   scale_fill_identity() +
-  theme_minimal() +
-  labs(
-    x = "Latitude",
-    y = "Longitude"
-  )
+  labs(x = "Weather Conditions",
+       y = "Light Conditions",
+       title = "Texas FARS Data: Color Gradient by Weather/Light Conditions")
+
+fars_tx_key
+
+# Plotting with map again (excluding unknown/unreported weather)
+
+fars_tx_weather %>%
+   mutate(weather_color_id = color_family_gen(level_1 = WEATHERNAME, level_2 = LGT_CONDNAME,
+                                               start_angle = 90, stop_angle = 360)) %>%
+  ggplot() + 
+  aes(
+    x = LONGITUD,
+    y = LATITUDE,
+    color = weather_color_id
+  ) +
+  geom_point() +
+  scale_color_identity() + # key step
+  theme_minimal()
+
 
 
 ```

@@ -4,3 +4,5 @@ inst/doc
 .Rdata
 .httr-oauth
 .DS_Store
+data-raw/*
+test_scripts/*

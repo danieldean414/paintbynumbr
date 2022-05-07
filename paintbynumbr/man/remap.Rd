@@ -2,7 +2,7 @@
 % Please edit documentation in R/paintbynumbr_code.R
 \name{remap}
 \alias{remap}
-\title{Remap: Helper function to scale a numeric vector to a user-provided range of values.}
+\title{remap: Helper function to scale a numeric vector to a user-provided range of values.}
 \usage{
 remap(
   input,
@@ -28,10 +28,8 @@ A vector the length of the input vector that returns original
 values scaled to be between \code{output_start} and \code{output_end}.
 }
 \description{
-Remap: Helper function to scale a numeric vector to a user-provided range of values.
+remap: Helper function to scale a numeric vector to a user-provided range of values.
 }
 \examples{
-example_vector <- rnorm(n = 10)
-remap(input = example_vector, output_start = 0, output_end = 1)
 
 }

@@ -1,5 +1,4 @@
-
-#' Remap: Helper function to scale a numeric vector to a user-provided range of values.
+#' remap: Helper function to scale a numeric vector to a user-provided range of values.
 #'
 #' @param input Numeric vector
 #' @param input_start Lowest value in `input` for scaling (can manually set another value, e.g. for consistency across multiple vectors)
@@ -12,12 +11,7 @@
 #'     values scaled to be between \code{output_start} and \code{output_end}.
 #'
 #'
-#'
-#'
-#'
 #' @examples
-#' example_vector <- rnorm(n = 10)
-#' remap(input = example_vector, output_start = 0, output_end = 1)
 #'
 remap <- function(input,
                   input_start = min(input),
