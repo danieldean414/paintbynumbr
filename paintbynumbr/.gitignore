@@ -6,3 +6,8 @@ inst/doc
 .DS_Store
 data-raw/*
 test_scripts/*
+01_data/*
+02_code/*
+chapter_2.R
+regexcite/*
+swimr.pkg.example/*
